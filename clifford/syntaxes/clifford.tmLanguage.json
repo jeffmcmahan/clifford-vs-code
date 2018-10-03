@@ -1,0 +1,299 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Clifford",
+	"scopeName": "source.clifford",
+	"patterns": [
+		{"include": "#comments"},
+		{"include": "#numbers"},
+		{"include": "#shorthands"},
+		{"include": "#strings"},
+		{"include": "#keywords"},
+		{"include": "#jsfunctions"},
+		{"include": "#jsClosures"},
+		{"include": "#variables"},
+		{"include": "#entities"},
+		{"include": "#cssBlocks"}
+	],
+	"repository": {
+		"numbers": {
+			"comment": "Block-level number arguments",
+			"patterns": [
+				{
+					"comment": "integer",
+					"name": "constant.numeric",
+					"match": "^\\d+$"
+				},
+				{
+					"comment": "float",
+					"name": "constant.numeric",
+					"match": "^\\d+\\.\\d+$"
+				}
+			]
+		},
+		"numberArguments": {
+			"comment": "Inline number arguments",
+			"patterns": [
+				{
+					"comment": "integer inline argument",
+					"match": "(?<=\\()(\\d+)(?=\\))",
+					"captures": {
+						"1": {"name": "constant.numeric"}
+					}
+				},
+				{
+					"comment": "float inline argument",
+					"match": "(?<=\\()(\\d+\\.\\d+)(?=\\))",
+					"captures": {
+						"1": {"name": "constant.numeric"}
+					}
+				}
+			]
+		},
+		"shorthands": {
+			"comment": "Sequences that will turn into unicode characters.",
+			"patterns": [
+				{
+					"match": "(^|[^\\\\])(---)",
+					"captures": {
+						"2": {"name": "string.other"}
+					}
+				},
+				{
+					"match": "(^|[^\\\\])(--)",
+					"captures": {
+						"2": {"name": "string.other"}
+					}
+				},
+				{
+					"match": "(^|[^\\\\])(\\.\\.\\.)",
+					"captures": {
+						"2": {"name": "string.other"}
+					}
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.line",
+					"match": "(?<!:)///.*"
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [{
+				"match": "(^|[^\\\\])(import)\\s*((\\()([a-zA-Z0-9$_]+,?\\s?)+(\\))|[a-zA-Z0-9$_]*)\\s*:\\s+?(.+?)(as)?\\s+?(style|script|content|module)?\\s*(?=\/{3}|$)",
+				"captures": {
+					"2": {"name": "keyword"},
+					"3": {"name": "string.other"},
+					"7": {"name": "string.other"},
+					"8": {"name": "keyword"},
+					"9": {"name": "support.class"}
+				}
+			}]
+		},
+		"entities": {
+			"patterns": [
+				{	
+					"comment": "Italicize the :i(...) argument.",
+					"begin": "(:)(i(talic)?)(?=\\()",
+					"beginCaptures": {
+						"1": {"name": "keyword"},
+						"2": {"name": "entity.name.function"}
+					},
+					"end": "\\)(?!\\()",
+					"patterns": [
+						{"include":"#numberArguments"},
+						{"include": "$self"},
+						{
+							"name": "markup.italic",
+							"match": "[^)(]"
+						}
+					]
+				},
+				{
+					"comment": "Boldface the :b(...) argument.",
+					"begin": "(:)(b(old)?)(?=\\()",
+					"beginCaptures": {
+						"1": {"name": "keyword"},
+						"2": {"name": "entity.name.function"}
+					},
+					"end": "\\)(?!\\()",
+					"patterns": [
+						{"include":"#numberArguments"},
+						{"include": "$self"},
+						{
+							"name": "markup.bold",
+							"match": "[^)(]"
+						}
+					]
+				},
+				{
+					"comment": "Highlight all inline function calls.",
+					"begin": "(:)([a-zA-Z][A-Za-z0-9_]*)!?(?=\\()",
+					"beginCaptures": {
+						"1": {"name": "keyword"},
+						"2": {"name": "entity.name.function"}
+					},
+					"end": "\\)(?!(!)?\\()",
+					"patterns": [
+						{"include":"#numberArguments"},
+						{"include": "$self"},
+						{
+							"name": "string.other",
+							"match": "[^)(]"
+						}
+					]
+				},
+				{
+					"comment": "Highlight all block-level function calls.",
+					"begin": "(^\\s*)([a-zA-Z][A-Za-z0-9_]*)!?(?=\\()",
+					"beginCaptures": {
+						"2": {"name": "entity.name.function"}
+					},
+					"end": "\\)(?!(!)?\\()",
+					"patterns": [
+						{"include":"#numberArguments"},
+						{"include": "$self"},
+						{
+							"name": "string.other",
+							"match": "[^)(]"
+						}
+					]
+				},
+				{
+					"comment": "Highlight html elements (which are function calls).",
+					"begin": "(^\\s*)(<[^/>\\n][^\\n>]*>)",
+					"beginCaptures": {
+						"2": {"name": "entity.name.function"}
+					},
+					"end": "(^\\s*)(<\\/[^\\n>]+>)",
+					"patterns": [
+						{"include": "$self"}
+					]
+				}
+			]
+		},
+		"jsfunctions": {
+			"begin": "^\\s*(def)\\s+(global\\s+)?([a-z][a-zA-Z0-9_]*)\\s*(:)\\s*((inline|block))\\s+(?=function)",
+			"while": "(^|\\G)(?!}\\s*$)",
+			"beginCaptures": {
+				"1": {"name": "keyword"},
+				"2": {"name": "keyword"},
+				"3": {"name": "variable"},
+				"4": {"name": "keyword"}
+			},
+			"patterns": [
+				{"include": "source.js"}
+			]
+		},
+		"jsClosures": {
+			"begin": "^\\s*(?=\\(function)",
+			"while": "(^|\\G)(?!\\}\\)\\(\\)\\s*$)",
+			"patterns": [
+				{"include": "source.js"}
+			]
+		},
+		"cssBlocks": {
+			"begin": "(?=@media(\\s+.+)?\\s*{$)",
+			"while": "(^|\\G)(?!}\\s*$)",
+			"patterns": [
+				{"include": "source.css"}
+			]
+		},
+		"variables": {
+			"patterns": [
+				{
+					"name": "variable",
+					"match": "[$][a-z][a-zA-Z0-9-]+"
+				},
+				{
+					"begin": "^\\s*(def)\\s+(global\\s+)?([a-z][a-zA-Z0-9-]+)\\s*(:)",
+					"end": "$",
+					"beginCaptures": {
+						"1": {"name": "keyword"},
+						"2": {"name": "keyword"},
+						"3": {"name": "variable"},
+						"4": {"name": "keyword"}
+					},
+					"patterns": [
+						{"include": "$self"},
+						{
+							"name": "constant.numeric",
+							"match": "(?<=:)\\s*\\d+(\\.\\d+)?(?=$)"
+						}
+					]
+				}
+			]
+		},
+		"strings": {
+			"patterns": [
+				{
+					"name": "constant.character.escape",
+					"match": "\\\\."
+				},
+				{
+					"comment": "Literal block argument at 1-tab deep (below, we go 10 deep).",
+					"begin": "(^[^\\t]+[)>])!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{1,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{1}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{2,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{2}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{3,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{3}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{4,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{4}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{5,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{5}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{6,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{6}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{7,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{7}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{8,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{8}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{9,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				},
+				{
+					"begin": "(^\\t{9}[^\\t]+\\))!\\s+$",
+					"beginCaptures": {"1":{"patterns":[{"include":"$self"}]}},
+					"end": "^(?!(\\s*$)|(\\t{10,}))",
+					"patterns": [{"include": "#keywords"}, {"name": "storage","match": ".+"}]
+				}
+			]
+		}
+	}
+}

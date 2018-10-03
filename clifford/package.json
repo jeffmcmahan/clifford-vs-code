@@ -1,0 +1,24 @@
+{
+    "name": "clifford",
+    "displayName": "Clifford",
+    "description": "Language support for Clifford",
+    "version": "0.0.1",
+    "publisher": "jeffmcmahan",
+    "engines": {
+        "vscode": "^1.21.0"
+    },
+    "categories": ["Programming Languages"],
+    "contributes": {
+        "languages": [{
+            "id": "clifford",
+            "aliases": ["clifford", "Clifford"],
+            "extensions": [".cfd", ".clifford"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "clifford",
+            "scopeName": "source.clifford",
+            "path": "./syntaxes/clifford.tmLanguage.json"
+        }]
+    }
+}
